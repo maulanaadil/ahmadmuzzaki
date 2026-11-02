@@ -4,7 +4,6 @@
 Slide Search CLI - Search slide design databases for strategies, layouts, copy, and charts
 """
 
-import sys
 import json
 import argparse
 from slide_search_core import (
@@ -14,50 +13,35 @@ from slide_search_core import (
 )
 
 
+RESULT_FIELDS = {
+    "strategy": ("strategy_name", [
+        ("Slides", "slide_count"), ("Structure", "structure"), ("Goal", "goal"),
+        ("Audience", "audience"), ("Tone", "tone"), ("Arc", "narrative_arc"),
+        ("Source", "sources")]),
+    "layout": ("layout_name", [
+        ("Use case", "use_case"), ("Zones", "content_zones"),
+        ("Visual weight", "visual_weight"), ("CTA", "cta_placement"),
+        ("Recommended", "recommended_for"), ("Avoid", "avoid_for"),
+        ("CSS", "css_structure")]),
+    "copy": ("formula_name", [
+        ("Components", "components"), ("Use case", "use_case"),
+        ("Template", "example_template"), ("Emotion", "emotion_trigger"),
+        ("Slide type", "slide_type"), ("Source", "source")]),
+    "chart": ("chart_type", [
+        ("Best for", "best_for"), ("Data type", "data_type"),
+        ("When to use", "when_to_use"), ("When to avoid", "when_to_avoid"),
+        ("Max categories", "max_categories"), ("Slide context", "slide_context"),
+        ("CSS", "css_implementation"), ("Accessibility", "accessibility_notes")]),
+}
+
+
 def format_result(result, domain):
     """Format a single search result for display"""
-    output = []
-
-    if domain == "strategy":
-        output.append(f"**{result.get('strategy_name', 'N/A')}**")
-        output.append(f"  Slides: {result.get('slide_count', 'N/A')}")
-        output.append(f"  Structure: {result.get('structure', 'N/A')}")
-        output.append(f"  Goal: {result.get('goal', 'N/A')}")
-        output.append(f"  Audience: {result.get('audience', 'N/A')}")
-        output.append(f"  Tone: {result.get('tone', 'N/A')}")
-        output.append(f"  Arc: {result.get('narrative_arc', 'N/A')}")
-        output.append(f"  Source: {result.get('sources', 'N/A')}")
-
-    elif domain == "layout":
-        output.append(f"**{result.get('layout_name', 'N/A')}**")
-        output.append(f"  Use case: {result.get('use_case', 'N/A')}")
-        output.append(f"  Zones: {result.get('content_zones', 'N/A')}")
-        output.append(f"  Visual weight: {result.get('visual_weight', 'N/A')}")
-        output.append(f"  CTA: {result.get('cta_placement', 'N/A')}")
-        output.append(f"  Recommended: {result.get('recommended_for', 'N/A')}")
-        output.append(f"  Avoid: {result.get('avoid_for', 'N/A')}")
-        output.append(f"  CSS: {result.get('css_structure', 'N/A')}")
-
-    elif domain == "copy":
-        output.append(f"**{result.get('formula_name', 'N/A')}**")
-        output.append(f"  Components: {result.get('components', 'N/A')}")
-        output.append(f"  Use case: {result.get('use_case', 'N/A')}")
-        output.append(f"  Template: {result.get('example_template', 'N/A')}")
-        output.append(f"  Emotion: {result.get('emotion_trigger', 'N/A')}")
-        output.append(f"  Slide type: {result.get('slide_type', 'N/A')}")
-        output.append(f"  Source: {result.get('source', 'N/A')}")
-
-    elif domain == "chart":
-        output.append(f"**{result.get('chart_type', 'N/A')}**")
-        output.append(f"  Best for: {result.get('best_for', 'N/A')}")
-        output.append(f"  Data type: {result.get('data_type', 'N/A')}")
-        output.append(f"  When to use: {result.get('when_to_use', 'N/A')}")
-        output.append(f"  When to avoid: {result.get('when_to_avoid', 'N/A')}")
-        output.append(f"  Max categories: {result.get('max_categories', 'N/A')}")
-        output.append(f"  Slide context: {result.get('slide_context', 'N/A')}")
-        output.append(f"  CSS: {result.get('css_implementation', 'N/A')}")
-        output.append(f"  Accessibility: {result.get('accessibility_notes', 'N/A')}")
-
+    if domain not in RESULT_FIELDS:
+        return ""
+    title_key, fields = RESULT_FIELDS[domain]
+    output = [f"**{result.get(title_key, 'N/A')}**"]
+    output.extend(f"  {label}: {result.get(key, 'N/A')}" for label, key in fields)
     return "\n".join(output)
 
 

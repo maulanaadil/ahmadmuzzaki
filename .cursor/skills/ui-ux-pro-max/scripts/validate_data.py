@@ -25,7 +25,6 @@ import re
 import statistics
 import sys
 from datetime import date
-from pathlib import Path
 from urllib.parse import parse_qs, quote_plus, urlsplit
 
 from core import (CSV_CONFIG, STACK_CONFIG, STACK_CURRENT_APPLICABILITY,
@@ -411,7 +410,7 @@ def _check_color_contract(rows, problems):
             if green > red * 1.1 and green > blue * 1.1:
                 problems.append(f"[color:{product}] Destructive token is success green")
         except ValueError:
-            pass
+            problems.append(f"[color:{product}] Destructive token is not a valid hex color")
 
 
 def _check_chart_contract(rows, problems):

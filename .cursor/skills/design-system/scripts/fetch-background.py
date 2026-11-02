@@ -8,7 +8,6 @@ Uses web scraping (no API key required) or WebFetch tool integration.
 import json
 import csv
 import re
-import sys
 from pathlib import Path
 
 # Project root relative to this script
@@ -45,15 +44,15 @@ def load_brand_colors():
         with open(TOKENS_PATH) as f:
             tokens = json.load(f)
 
-        colors = tokens.get('primitive', {}).get('color', {})
-        semantic = tokens.get('semantic', {}).get('color', {})
+        colors = _dig(tokens, 'primitive', 'color') or {}
+        semantic = _dig(tokens, 'semantic', 'color') or {}
 
         # Try semantic tokens first (preferred) - resolve references
         if semantic:
-            primary_ref = semantic.get('primary', {}).get('$value')
-            secondary_ref = semantic.get('secondary', {}).get('$value')
-            accent_ref = semantic.get('accent', {}).get('$value')
-            background_ref = semantic.get('background', {}).get('$value')
+            primary_ref = _dig(semantic, 'primary', '$value')
+            secondary_ref = _dig(semantic, 'secondary', '$value')
+            accent_ref = _dig(semantic, 'accent', '$value')
+            background_ref = _dig(semantic, 'background', '$value')
 
             primary = resolve_token_reference(primary_ref, tokens)
             secondary = resolve_token_reference(secondary_ref, tokens)
@@ -79,23 +78,23 @@ def load_brand_colors():
 
         for key in primary_keys:
             if key in colors and isinstance(colors[key], dict):
-                primary_color = colors[key].get('500', {}).get('$value')
+                primary_color = _dig(colors[key], '500', '$value')
                 if primary_color:
                     break
 
         for key in secondary_keys:
             if key in colors and isinstance(colors[key], dict):
-                secondary_color = colors[key].get('500', {}).get('$value')
+                secondary_color = _dig(colors[key], '500', '$value')
                 if secondary_color:
                     break
 
         for key in accent_keys:
             if key in colors and isinstance(colors[key], dict):
-                accent_color = colors[key].get('500', {}).get('$value')
+                accent_color = _dig(colors[key], '500', '$value')
                 if accent_color:
                     break
 
-        background = colors.get('dark', {}).get('800', {}).get('$value', '#0D0D0D')
+        background = _dig(colors, 'dark', '800', '$value') or '#0D0D0D'
 
         return {
             'primary': primary_color or '#3B82F6',
@@ -113,6 +112,15 @@ def load_brand_colors():
         }
 
 
+def _dig(data, *path):
+    """Walk nested dicts; return None as soon as a key is missing."""
+    for key in path:
+        if not isinstance(data, dict) or key not in data:
+            return None
+        data = data[key]
+    return data
+
+
 def load_backgrounds_config():
     """Load background configuration from CSV."""
     config = {}
@@ -121,8 +129,8 @@ def load_backgrounds_config():
             reader = csv.DictReader(f)
             for row in reader:
                 config[row['slide_type']] = row
-    except FileNotFoundError:
-        print(f"Warning: {BACKGROUNDS_CSV} not found")
+    except FileNotFoundError as exc:
+        raise SystemExit(f"error: backgrounds config {BACKGROUNDS_CSV} not found") from exc
     return config
 
 
