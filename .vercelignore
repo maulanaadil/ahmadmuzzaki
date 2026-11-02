@@ -1,0 +1,7 @@
+.agents/
+.claude/
+.cursor/
+skills-lock.json
+.env*
+.next/
+node_modules/
