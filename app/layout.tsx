@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import { DM_Sans } from "next/font/google";
 import { getSiteUrl } from "./site-config";
 import "./globals.css";
+
+const dmSans = DM_Sans({ subsets: ["latin"], style: ["normal", "italic"], display: "swap", variable: "--font-dm-sans" });
 
 const title = "Ahmad Muzzaki Mahmud | Finance & Operations Manager";
 const description =
@@ -27,5 +30,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
-  return <html lang="en"><body>{children}</body></html>;
+  return <html lang="en" className={dmSans.variable}><body>{children}</body></html>;
 }
